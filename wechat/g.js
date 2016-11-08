@@ -1,13 +1,12 @@
-
 var sha1 = require('sha1')
 var getRawBody = require('raw-body')
 var Wechat = require('./wechat')
 var util = require('./util')
 
-module.exports = function(opts){
-    //var wechat = new Wechat(opts)
+module.exports = function(opts, handler) {
+    var wechat = new Wechat(opts)
 
-    return function *(next) {
+    return function*(next) {
         var that = this
         var token = opts.token
         var signature = this.query.signature
@@ -17,14 +16,13 @@ module.exports = function(opts){
         var str = [token, timestamp, nonce].sort().join('')
         var sha = sha1(str)
 
-        if(this.method === 'GET'){
+        if (this.method === 'GET') {
             if (sha === signature) {
                 this.body = echostr + ''
             } else {
                 this.body = 'wrong'
             }
-        }
-        else if (this.method ==='POST'){
+        } else if (this.method === 'POST') {
             if (sha !== signature) {
                 this.body = 'wrong'
                 return false
@@ -43,40 +41,12 @@ module.exports = function(opts){
 
             console.log(message)
 
-            if(message.MsgType ==='event'){
-                if(message.Event === 'subscribe'){
-                    var now = new Date().getTime()
+            this.weixin = message
 
-                    that.status = 200
-                    that.type = 'application/xml'
-                    that.body = '<xml>' +
-                                '<ToUserName><![CDATA['+ message.FromUserName +']]></ToUserName>' +
-                                '<FromUserName><![CDATA['+ message.ToUserName +']]></FromUserName>' +
-                                '<CreateTime>'+ now +'</CreateTime>' +
-                                '<MsgType><![CDATA[text]]></MsgType>' +
-                                '<Content><![CDATA[fuck everything just be happy]]></Content>' +
-                                '</xml>'
+            yield handler.call(this, next)
 
-                                return
-                }
-            }
-            if(message.MsgType ==='text'){
-                if(message.Content === '垃圾航'){
-                    var now = new Date().getTime()
+            wechat.reply.call(this)
 
-                    that.status = 200
-                    that.type = 'application/xml'
-                    that.body = '<xml>' +
-                                '<ToUserName><![CDATA['+ message.FromUserName +']]></ToUserName>' +
-                                '<FromUserName><![CDATA['+ message.ToUserName +']]></FromUserName>' +
-                                '<CreateTime>'+ now +'</CreateTime>' +
-                                '<MsgType><![CDATA[text]]></MsgType>' +
-                                '<Content><![CDATA[操你妈的辣鸡阳]]></Content>' +
-                                '</xml>'
-
-                                return
-                }
-            }
         }
-        }
-        }
+    }
+}

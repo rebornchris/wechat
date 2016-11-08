@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird')
 var request = Promise.promisify(require('request'))
-
+var util = require('./util')
 var prefix = 'https://api.weixin.qq.com/cgi-bin/'
 var api = {
     accessToken :prefix + 'token?grant_type=client_credential'
@@ -70,6 +70,18 @@ Wechat.prototype.updateAccessToken = function(data){
             resolve(data)
     })
     })
+}
+
+Wechat.prototype.reply = function(){
+    var content = this.body
+    var message = this.weixin
+
+    var xml = util.tpl(content, message)
+
+    this.status = 200
+    this.type =  'application/xml'
+    this.body = xml
+    console.log(xml)
 }
 
 module.exports = Wechat
