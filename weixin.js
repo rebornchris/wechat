@@ -1,5 +1,10 @@
 'use strict'
 
+var config = require('./config')
+var Wechat = require('./wechat/wechat')
+var path = require('path')
+var wechatApi = new Wechat(config.wechat)
+
 exports.reply = function* (next){
     var message = this.weixin
 
@@ -30,14 +35,24 @@ exports.reply = function* (next){
             reply = '北理狙击求虐'
         }
         if(content === '李萱娅'){
-            reply = '谁也别跟我抢！！！！！'
+            var data = yield(wechatApi.uploadMaterial('image',path.join(__dirname, './2.jpg')))
+             reply = {
+                type: 'image',
+                mediaId: data.media_id
+
+            }
+
+
+        }
+        if(content === '我爱你'){
+            reply = 'http://rebornchris.coding.me/lixuanya'
         }
         if(content === '晚安'){
             reply = [{
                 title: '晚安我的宝宝',
                 description: '就只是一个简单的图片啦',
                 picUrl: 'https://ooo.0o0.ooo/2016/11/08/5821ddce4f236.jpg',
-                url: 'http://weibo.com/u/2273667002'
+                url: 'http://rebornchris.coding.me/lixuanya'
             }]
         }
 
